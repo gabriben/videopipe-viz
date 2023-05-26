@@ -13,6 +13,15 @@ except: # TODO: fix blind except
     pass
 
 
+def frame_number_to_timestamp(frame_number, fps):
+    total_seconds = frame_number / fps
+    minutes = int(total_seconds // 60)
+    seconds = int(total_seconds % 60)
+    milliseconds = int((total_seconds % 1) * 1000)
+    timestamp = f"{minutes:02d}:{seconds:02d}:{milliseconds:03d}"
+    return timestamp
+
+
 def get_frame_by_number(clip, frame_number):
     """ Returns the frame from the clip by their frame_number. """
     frame_duration = 1 / clip.fps

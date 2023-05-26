@@ -39,8 +39,12 @@ def make_frame_line(clip, midroll_marker, surrounding_frames=2):
               f"Midroll between frames {frame_before_midroll} and {frame_after_midroll}",
               font=font,
               fill='white')
+    before_timestamp = core.frame_number_to_timestamp(frame_before_midroll,
+                                                      clip.fps)
+    after_timestamp = core.frame_number_to_timestamp(frame_after_midroll,
+                                                     clip.fps)
     draw.text(((surrounding_frames + 0.2) * w, h/2),
-              f"timestamps: {frame_before_midroll/clip.fps} and {frame_after_midroll/clip.fps}",
+              f"timestamps: {before_timestamp} and {after_timestamp}",
               font=font,
               fill='white')
 
@@ -71,5 +75,5 @@ if __name__ == '__main__':
 
     make_frame_line(clip,
                     midroll_markers[0],
-                    surrounding_frames=4
+                    surrounding_frames=2
                     ).save(f"{v_name}_midroll_indication.jpg")
