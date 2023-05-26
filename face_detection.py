@@ -4,13 +4,13 @@ import moviepy.editor as mp
 from PIL import Image
 from PIL import ImageDraw
 
-from core_viz import *
+import core_viz as core
 
 def read_face_detection(path, v_name, task):
     '''
     Read the face detection JSON file.
     '''
-    faces = pd.read_json(path + v_name + '/' + v_name + task + '.json', lines = True)
+    faces = pd.read_json(path + v_name + '/' + v_name + task + '.json', lines=True)
     faces_detected = [f for f in faces.data[0] if len(f['faces']) > 0]
     return faces_detected
 
@@ -26,7 +26,7 @@ def draw_bounding_boxes(clip, faces, img, color='red', bb_width=5):
 
     '''
     for face in faces['faces']:
-        scaled_bb = scale_bb_to_image(clip, *face['bb_faces'])
+        scaled_bb = core.scale_bb_to_image(clip, *face['bb_faces'])
         draw = ImageDraw.Draw(img)
         draw.rectangle(scaled_bb, outline=color, width=bb_width)
 
@@ -36,7 +36,7 @@ def make_frame(clip, faces):
     """ Draw the faces on top of the frame in 'clip' and also return the corresponding frame timestamp. """
     face_frame_number = faces['dimension_idx']
     face_timestamp = face_frame_number / clip.fps
-    frame = get_frame_by_number(clip, face_frame_number)
+    frame = core.get_frame_by_number(clip, face_frame_number)
     bb_frame = draw_bounding_boxes(clip, faces, frame)
 
     return face_timestamp, bb_frame
@@ -61,6 +61,7 @@ def get_face_clips(clip, faces_detected, face_frame_duration, timestamp_offset=0
 
     return clips, timestamp_offset
 
+
 if __name__ == '__main__':
 
     # Names of path, videofile and type of JSON.
@@ -79,7 +80,7 @@ if __name__ == '__main__':
     faces_detected = read_face_detection(video_path, v_name, task)
     v_name = video_path + v_name
 
-    clip = read_clip(v_name)
+    clip = core.read_clip(v_name)
     fps = clip.fps
     frame_duration = 1 / fps
 
@@ -100,8 +101,8 @@ if __name__ == '__main__':
         if (round == len(faces_detected) // faces_per_round):
             clips.append(clip.subclip(prev_ts, clip.duration))
 
-        write_clip(mp.concatenate_videoclips(clips), v_name, str(round), False)
+        core.write_clip(mp.concatenate_videoclips(clips), v_name, str(round), False)
         f.write('file ' + v_name + '_' + str(round) + '.mp4\n')
     f.close()
 
-    files_to_video(clip, v_name, round, 'face_detection.txt', output_filename)
+    core.files_to_video(clip, v_name, round, 'face_detection.txt', output_filename)

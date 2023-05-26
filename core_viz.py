@@ -1,14 +1,15 @@
 from PIL import Image
 import moviepy.editor as mp
-from numpy import asarray
+import numpy as np
 import subprocess
 import os
 
-# Change the ffmpeg binary of moviepy to the local one to allow for hw acceleration.
+# Change the ffmpeg binary of moviepy to the local one
+# to allow for hw acceleration.
 try:
     from moviepy.config import change_settings
-    change_settings({"FFMPEG_BINARY":"ffmpeg"})
-except:
+    change_settings({"FFMPEG_BINARY": "ffmpeg"})
+except: # TODO: fix blind except
     pass
 
 
@@ -26,7 +27,9 @@ def read_clip(v_name):
 
 
 def scale_bb_to_image(clip, y0, x1, y1, x0, RESIZE_DIM=640):
-    """ Scales a bounding box to the image using the global RESIZE_DIM variable. """
+    """ Scales a bounding box to the image
+        using the global RESIZE_DIM variable.
+    """
 
     w, h = clip.size
     width_ratio = w / RESIZE_DIM
@@ -40,7 +43,15 @@ def scale_bb_to_image(clip, y0, x1, y1, x0, RESIZE_DIM=640):
     return [x0, y0, x1, y1]
 
 
-def create_text_clip(txt, txtclip_dur=1/25, color='white', font="Century-Schoolbook-Roman", fontsize=70, kerning=-2, interline=-1, bg_color='black', clipsize = (1920, 1080)):
+def create_text_clip(txt,
+                     txtclip_dur=1/25,
+                     color='white',
+                     font="Century-Schoolbook-Roman",
+                     fontsize=70,
+                     kerning=-2,
+                     interline=-1,
+                     bg_color='black',
+                     clipsize=(1920, 1080)):
     '''
     Create frame of length txtclip_dur with txt in the center.
     '''
@@ -52,19 +63,23 @@ def create_text_clip(txt, txtclip_dur=1/25, color='white', font="Century-Schoolb
     return txtclip
 
 
-def create_top_frame_clip(clip, top_frames, still_duration=3, text_frame_duration=1):
+def create_top_frame_clip(clip,
+                          top_frames,
+                          still_duration=3,
+                          text_frame_duration=1):
     '''
     Returns a clip of the top frames preceded by a clip showing the ranking of
     the clip.
     '''
 
-    start_frame = create_text_clip(f"Top {len(top_frames)} thumbnails", text_frame_duration)
+    start_frame = create_text_clip(f"Top {len(top_frames)} thumbnails",
+                                   text_frame_duration)
     clips = [start_frame]
     count = len(top_frames)
     for frame in top_frames:
         txtclip = create_text_clip(f"{count}.", text_frame_duration)
         still = get_frame_by_number(clip, frame)
-        imgclip = mp.ImageClip(asarray(still), duration=still_duration)
+        imgclip = mp.ImageClip(np.asarray(still), duration=still_duration)
         clips.append(txtclip)
         clips.append(imgclip)
         count -= 1
@@ -81,14 +96,26 @@ def write_audioclip(clip, v_name, logger=None):
 def write_clip(clip, name, postfix='', audio=True, fps=25, logger=None):
     ''' Write the clip to a file. Try using hw acceleration first. '''
     try:
-        clip.write_videofile(name + '_' + postfix + '.mp4', codec='h264_nvenc', fps=fps, logger=logger, audio=audio, preset='fast')
-    except:
+        clip.write_videofile(f"{name}_{postfix}.mp4",
+                             codec='h264_nvenc',
+                             fps=fps,
+                             logger=logger,
+                             audio=audio,
+                             preset='fast')
+    except: # TODO: fix blind except
         try:
-            clip.write_videofile(name + '_' + postfix + '.mp4', codec='libx264', fps=fps, logger=logger, audio=audio, preset='ultrafast')
-        except:
+            clip.write_videofile(f"{name}_{postfix}.mp4",
+                                 codec='libx264',
+                                 fps=fps,
+                                 logger=logger,
+                                 audio=audio,
+                                 preset='ultrafast')
+        except: # TODO: fix blind except
             raise Exception('An error occured while writing the video file.')
 
-def files_to_video(clip, v_name, rounds, filename, output_name, retain_audio=True):
+
+def files_to_video(clip, v_name, rounds, filename,
+                   output_name, retain_audio=True):
     ''' Concatenate the video files in filename and write it to output_name.
         If retain_audio is True, the audio will be added to the video. '''
     if retain_audio:
@@ -103,13 +130,18 @@ def files_to_video(clip, v_name, rounds, filename, output_name, retain_audio=Tru
 
 
 def concatenate_videofiles(filename, output_name):
-    ''' Concatenate the video files in filename and write it to output_name. '''
-    subprocess.call("ffmpeg -f concat -safe 0 -i " + filename + " -c copy -y " + output_name, shell=True)
+    ''' Concatenate the video files in filename
+        and write it to output_name.
+    '''
+    cmd = f"ffmpeg -f concat -safe 0 -i {filename} -c copy -y {output_name}"
+    subprocess.call(cmd, shell=True)
 
 
 def add_audio_to_video(video_name, audio_name, output_name):
     ''' Add audio to video and write it to output_name. '''
-    subprocess.call("ffmpeg -i " + video_name + " -i " + audio_name + " -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 -shortest -y " + output_name, shell=True)
+    cmd = (f"ffmpeg -i {video_name} -i {audio_name} -c:v copy"
+           f"-c:a aac -map 0:v:0 -map 1:a:0 -shortest -y {output_name}")
+    subprocess.call(cmd, shell=True)
 
 
 def clean_up_files(v_name, rounds, txt_filename, output_filename='temp.mp4'):

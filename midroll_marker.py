@@ -4,15 +4,7 @@ import core_viz as core
 from PIL import Image, ImageDraw, ImageFont
 
 
-def get_frame_by_number(clip, frame_number):
-    """ Returns the frame from the clip by their frame_number. """
-
-    frame_duration = 1 / clip.fps
-    frame = clip.get_frame(frame_number * frame_duration)
-    return Image.fromarray(frame)
-
-
-def make_frame_line(clip, midroll_marker):
+def make_frame_line(clip, midroll_marker, surrounding_frames=2):
     """ Make a row of frames indicating
     the frame-precise position of the midroll. """
     w, h = clip.size
@@ -28,20 +20,35 @@ def make_frame_line(clip, midroll_marker):
         frame_before_midroll = int(float(midroll_marker))
         frame_after_midroll = int(np.ceil(float(midroll_marker)))
 
-    frame_line = Image.new('RGB', (5 * w, h))
+    total_frames = 2 * surrounding_frames + 1
+    frame_line = Image.new('RGB', (total_frames * w, h))
 
-    frame_line.paste(get_frame_by_number(clip, frame_before_midroll - 1), (0, 0))
-    frame_line.paste(get_frame_by_number(clip, frame_before_midroll), (w, 0))
+    for before_idx in range(surrounding_frames):
+        frame = core.get_frame_by_number(clip, frame_before_midroll - before_idx)
+        pos_in_line = ((surrounding_frames - 1 - before_idx) * w, 0)
+        frame_line.paste(frame, pos_in_line)
+
+    for after_idx in range(surrounding_frames):
+        frame = core.get_frame_by_number(clip, frame_after_midroll + after_idx)
+        pos_in_line = ((2 * surrounding_frames - after_idx) * w, 0)
+        frame_line.paste(frame, pos_in_line)
 
     font = ImageFont.truetype("NotoSansMono-Bold.ttf", 50)
     draw = ImageDraw.Draw(frame_line)
-    draw.text((2.2 * w, h/3), f"Midroll between frames {frame_before_midroll} and {frame_after_midroll}", font=font, fill='white')
-    draw.text((2.2 * w, h/2), f"timestamps: {frame_before_midroll/clip.fps} and {frame_after_midroll/clip.fps}", font=font, fill='white')
-
-    frame_line.paste(get_frame_by_number(clip, frame_after_midroll), (3 * w, 0))
-    frame_line.paste(get_frame_by_number(clip, frame_after_midroll + 1), (4 * w, 0))
+    draw.text(((surrounding_frames + 0.2) * w, h/3),
+              f"Midroll between frames {frame_before_midroll} and {frame_after_midroll}",
+              font=font,
+              fill='white')
+    draw.text(((surrounding_frames + 0.2) * w, h/2),
+              f"timestamps: {frame_before_midroll/clip.fps} and {frame_after_midroll/clip.fps}",
+              font=font,
+              fill='white')
 
     return frame_line
+
+# def make_frame_lines(clip, midroll_markers):
+
+#     for marker in midroll_markers:
 
 
 if __name__ == '__main__':
@@ -54,13 +61,15 @@ if __name__ == '__main__':
     task = '_midroll_marker_output'
 
     # read thumbnail json
-
-    midroll = pd.read_json(f"{path + v_name}/{v_name + task}.json", lines=True)
+    midroll = pd.read_json(f"{v_name}/{v_name + task}.json", lines=True)
     midroll_markers = midroll['midroll_markers'][0]
 
     # Read video file with moviepy
 
-    clip = core.read_clip(v_name)
+    clip = core.read_clip(video_path + v_name)
     # mp.VideoFileClip(video_path + v_name + '.mp4')
 
-    make_frame_line(clip, midroll_markers[0]).save(f"{v_name}_midroll_indication.jpg")
+    make_frame_line(clip,
+                    midroll_markers[0],
+                    surrounding_frames=4
+                    ).save(f"{v_name}_midroll_indication.jpg")
