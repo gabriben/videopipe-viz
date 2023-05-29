@@ -13,12 +13,16 @@ except: # TODO: fix blind except
     pass
 
 
-def frame_number_to_timestamp(frame_number, fps):
+def frame_number_to_timestamp(frame_number, fps, format='milliseconds'):
     total_seconds = frame_number / fps
     minutes = int(total_seconds // 60)
     seconds = int(total_seconds % 60)
     milliseconds = int((total_seconds % 1) * 1000)
-    timestamp = f"{minutes:02d}:{seconds:02d}:{milliseconds:03d}"
+    if format == 'milliseconds':
+        timestamp = f"{minutes:02d}:{seconds:02d}:{milliseconds:03d}"
+    elif format == 'seconds':
+        timestamp = f"{minutes:02d}:{seconds:02d}"
+
     return timestamp
 
 
