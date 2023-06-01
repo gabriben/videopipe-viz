@@ -152,8 +152,8 @@ def concatenate_videofiles(filename, output_name):
 
 def add_audio_to_video(video_name, audio_name, output_name):
     ''' Add audio to video and write it to output_name. '''
-    cmd = (f"ffmpeg -i {video_name} -i {audio_name} -c:v copy"
-           f"-c:a aac -map 0:v:0 -map 1:a:0 -shortest -y {output_name}")
+    cmd = (f"ffmpeg -i {video_name} -i {audio_name} "
+           f"-map 0 -map 1:a -c:v copy -shortest {output_name}")
     subprocess.call(cmd, shell=True)
 
 

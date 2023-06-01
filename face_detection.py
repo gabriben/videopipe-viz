@@ -77,7 +77,7 @@ if __name__ == '__main__':
     output_filename = 'output.mp4'
     duration_t = 1/25
 
-    faces_detected = read_face_detection(video_path, v_name, task)
+    faces_detected = read_face_detection('', v_name, task)
     v_name = video_path + v_name
 
     clip = core.read_clip(v_name)
