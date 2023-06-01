@@ -16,16 +16,30 @@ def read_face_detection(v_name, task):
     return faces_detected
 
 
-def make_timeline(clip, detected_output, size, detail_modifier=0.5):
+def make_timeline(clip, detected_output, size,
+                  add_detection_indicator=False, detail_modifier=0.5):
     w, h = size
     total_frames = int(clip.duration * clip.fps)
     px = 1/plt.rcParams['figure.dpi']  # pixel in inches
 
     fig, ax = plt.subplots(figsize=(w*px, h*px))
+
     sns.set_style('whitegrid')
-    sns.kdeplot(np.array(detected_output),
-                clip=(0, total_frames),
-                bw_method=0.10 * detail_modifier)
+    g = sns.kdeplot(np.array(detected_output),
+                    clip=(0, total_frames),
+                    bw_method=0.10 * detail_modifier,
+                    color='navy',
+                    zorder=100)
+
+    if add_detection_indicator:
+        ymin, ymax = g.get_ylim()
+        g.vlines(detected_output,
+                 ymin=ymin,
+                 ymax=ymax,
+                 colors='lightblue',
+                 lw=1,
+                 zorder=0)
+
     ax.set_xlim(0, total_frames)
     axis_frames = range(0, total_frames, total_frames // 10)
     axis_timestamps = [core.frame_number_to_timestamp(fr,
@@ -55,9 +69,9 @@ if __name__ == '__main__':
     fig, ax = make_timeline(clip,
                             data,
                             (w, h/7),
+                            add_detection_indicator=True,
                             detail_modifier=0.3)
 
-    plt.show()
     last_line = None
 
     def make_frame(t):
