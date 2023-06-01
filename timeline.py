@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import moviepy as mp
 import matplotlib.pyplot as plt
 import seaborn as sns
 from moviepy.video.io.bindings import mplfig_to_npimage
@@ -70,7 +71,8 @@ if __name__ == '__main__':
                                linewidth=1)
         return mplfig_to_npimage(fig)
 
-    # animation = mp.VideoClip(make_frame, duration=clip.duration)
-    # core.write_clip(animation, "timeline_test", audio=False)
+    animation = mp.VideoClip(make_frame, duration=clip.duration)
+    core.write_clip(animation, "timeline_test", audio=False)
+
 
 
