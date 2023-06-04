@@ -146,6 +146,12 @@ if __name__ == '__main__':
 
     # TODO: debug timeline length too short.
 
+    core.write_clip(animation, v_name + task + "_timeline", audio=False)
+
+    add_timeline_to_video(v_name + "_txt_detection.mp4",
+                          v_name + task + "_timeline_.mp4",
+                          v_name + task + "_timeline.mp4")
+
 
 
 
