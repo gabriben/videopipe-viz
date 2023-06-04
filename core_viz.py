@@ -41,7 +41,7 @@ def read_clip(v_name):
 
 def scale_bb_to_image(clip, y0, x1, y1, x0, RESIZE_DIM=640):
     """ Scales a bounding box to the image
-        using the global RESIZE_DIM variable.
+        using the RESIZE_DIM variable.
     """
 
     w, h = clip.size
