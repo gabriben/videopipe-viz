@@ -4,7 +4,8 @@ import core_viz as core
 from PIL import Image, ImageDraw, ImageFont
 
 
-def make_frame_line(clip, midroll_marker, surrounding_frames=2):
+def make_frame_line(clip, midroll_marker, surrounding_frames=2,
+                    frame_type='Midroll'):
     """ Make a row of frames indicating
     the frame-precise position of the midroll. """
     w, h = clip.size
@@ -24,7 +25,8 @@ def make_frame_line(clip, midroll_marker, surrounding_frames=2):
     frame_line = Image.new('RGB', (total_frames * w, h))
 
     for before_idx in range(surrounding_frames):
-        frame = core.get_frame_by_number(clip, frame_before_midroll - before_idx)
+        frame = core.get_frame_by_number(clip,
+                                         frame_before_midroll - before_idx)
         pos_in_line = ((surrounding_frames - 1 - before_idx) * w, 0)
         frame_line.paste(frame, pos_in_line)
 
@@ -33,17 +35,19 @@ def make_frame_line(clip, midroll_marker, surrounding_frames=2):
         pos_in_line = ((2 * surrounding_frames - after_idx) * w, 0)
         frame_line.paste(frame, pos_in_line)
 
-    font = ImageFont.truetype("NotoSansMono-Bold.ttf", 50)
+    font = ImageFont.truetype("NotoSansMono-Bold.ttf", 70)
     draw = ImageDraw.Draw(frame_line)
-    draw.text(((surrounding_frames + 0.2) * w, h/3),
-              f"Midroll between frames {frame_before_midroll} and {frame_after_midroll}",
+    output_text = f"{frame_type.capitalize()} between frames " + \
+                  f"{frame_before_midroll} and {frame_after_midroll}"
+    draw.text(((surrounding_frames + 0.05) * w, h/3),
+              output_text,
               font=font,
               fill='white')
     before_timestamp = core.frame_number_to_timestamp(frame_before_midroll,
                                                       clip.fps)
     after_timestamp = core.frame_number_to_timestamp(frame_after_midroll,
                                                      clip.fps)
-    draw.text(((surrounding_frames + 0.2) * w, h/2),
+    draw.text(((surrounding_frames + 0.05) * w, h/2),
               f"timestamps: {before_timestamp} and {after_timestamp}",
               font=font,
               fill='white')
