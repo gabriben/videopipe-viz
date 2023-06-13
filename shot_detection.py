@@ -23,19 +23,14 @@ def create_shot_clip(shot_end_frame_number, size, shot_frame_duration=1):
     '''
     w, h = size
     shot_info_frame = Image.new('RGB', size)
-    frame_line = make_frame_line(clip, shot_end_frame_number, frame_type="Shot ends")
+    frame_line = make_frame_line(clip,
+                                 shot_end_frame_number,
+                                 frame_type="Shot ends")
     frame_line.thumbnail(size, Image.LANCZOS)
     shot_info_frame.paste(frame_line, (0, int(h/2)))
     shotclip = mp.ImageClip(np.asarray(shot_info_frame),
                             duration=shot_frame_duration)
 
-    # txtclip = (mp.TextClip(txt, color=color,
-    #            font=font, fontsize=fontsize, kerning=kerning,
-    #            interline=interline, bg_color=bg_color, size=(w, h))
-    #            .set_duration(txtclip_dur)
-    #            .set_position(('center')))
-    # return txtclip
-    #return shot_info_frame
     return shotclip
 
 
