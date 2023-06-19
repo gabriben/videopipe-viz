@@ -91,8 +91,8 @@ if __name__ == '__main__':
         shot_batch = shots_detected[start_shot_number:end_shot_number]
         clips, prev_t, shot_count = get_shot_clips(clip,
                                                    shot_batch,
-                                                   shot_frame_duration,
-                                                   shot_count)
+                                                   shot_frame_duration=shot_frame_duration,
+                                                   shot_count=shot_count)
 
         if (round == len(shots_detected) // shots_per_round):
             clips.append(clip.subclip(prev_t, clip.duration))
