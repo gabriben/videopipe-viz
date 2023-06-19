@@ -61,6 +61,12 @@ def make_timeline(clip, detected_output, height_ratio=7,
                  lw=1,
                  zorder=0)
 
+    midroll_indicator = 10664
+    ax.axvline(midroll_indicator,
+               color='orange',
+               linestyle='solid',
+               linewidth=2)
+
     ax.set_xlim(0, total_frames)
     # TODO: Optimize ticks
     axis_frames = range(0, total_frames, total_frames // 10)
@@ -85,43 +91,47 @@ def calculate_time_indicator_frame_number(t):
     global delay_frames_left
     global fps
 
+    current_frame = int(round(t * clip.fps))
     if amount_of_frames_per_delay > 0:
         if delay_frames_left == 0:
             delay_frames_left = amount_of_frames_per_delay
         elif delay_frames_left < amount_of_frames_per_delay:
             delay_frames_left -= 1
             total_frames_delay += 1
-        elif int(t * clip.fps - total_frames_delay) in delay_frames_set:
+        elif current_frame - total_frames_delay in delay_frames_set:
+            delay_frames_set.discard(current_frame - total_frames_delay)
             delay_frames_left -= 1
             total_frames_delay += 1
 
-        return t * clip.fps - total_frames_delay
+        # +1 for the just added total_frames_delay
+        return current_frame - total_frames_delay + 1
 
-    return t * clip.fps
+    return current_frame
 
 
 if __name__ == '__main__':
     video_path = 'Videos/'
     v_name = 'HIGH_LIGHTS_I_SNOWMAGAZINE_I_SANDER_26'
     task = '_shot_boundaries_datamodel'
-    detection_delay_sec = 1
+    detection_delay_sec = 2
 
-    faces_detected = read_shot_detection(v_name, task)
+    data_detected = read_shot_detection(v_name, task)
     v_name = video_path + v_name
 
     clip = core.read_clip(v_name)
     fps = clip.fps
-    data = [face['dimension_idx'] for face in faces_detected]
+    data = [d['dimension_idx'] for d in data_detected]
 
     fig, ax = make_timeline(clip,
                             data,
                             add_detection_indicator=True)
 
+
     # Global variables used to calculate the place of the time indicator
     # in the detection frequency plot animation.
-    amount_of_frames_per_delay = detection_delay_sec * fps
+    amount_of_frames_per_delay = int(detection_delay_sec * fps)
     total_frames_delay = 0
-    delay_frames_set = set(data)
+    delay_frames_set = set(data)  #set([d for d in data])
     delay_frames_left = amount_of_frames_per_delay
 
     last_line = None
@@ -141,16 +151,15 @@ if __name__ == '__main__':
         return mplfig_to_npimage(fig)
 
     total_video_time = clip.duration + len(data) * detection_delay_sec
+
     animation = mp.VideoClip(make_frame,
-                             duration=total_video_time,)
+                             duration=total_video_time)
 
-    # TODO: debug timeline length too short.
+    core.write_clip(animation, v_name + task + "_timeline_with_midroll_test_2sec_test_v3", audio=False)
 
-    core.write_clip(animation, v_name + task + "_timeline", audio=False)
-
-    add_timeline_to_video(v_name + "_txt_detection.mp4",
-                          v_name + task + "_timeline_.mp4",
-                          v_name + task + "_timeline.mp4")
+    add_timeline_to_video("HIGH_LIGHTS_I_SNOWMAGAZINE_I_SANDER_26_shot_boundaries_datamodel_2sec.mp4",
+                          v_name + task + "_timeline_with_midroll_test_2sec_test_v3_.mp4",
+                          v_name + task + "_timeline_midroll_2sec_final.mp4")
 
 
 
