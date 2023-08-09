@@ -26,17 +26,16 @@ def frame_number_to_timestamp(frame_number, fps, format='milliseconds'):
     return timestamp
 
 
-def get_frame_by_number(clip, frame_number):
+def get_frame_by_number(clip: mp.VideoFileClip, frame_number: int) -> Image:
     """ Returns the frame from the clip by their frame_number. """
     frame_duration = 1 / clip.fps
     frame = clip.get_frame(frame_number * frame_duration)
     return Image.fromarray(frame)
 
 
-def read_clip(v_name):
+def read_clip(v_name: str) -> mp.VideoFileClip:
     ''' Read the video file at given path. '''
-    clip = mp.VideoFileClip(v_name + '.mp4')
-    return clip
+    return mp.VideoFileClip(v_name + '.mp4')
 
 
 def scale_bb_to_image(clip, y0, x1, y1, x0, RESIZE_DIM=640):
@@ -53,7 +52,7 @@ def scale_bb_to_image(clip, y0, x1, y1, x0, RESIZE_DIM=640):
     x0 = int(x0 * width_ratio)
     x1 = int(x1 * width_ratio)
 
-    return [x0, y0, x1, y1]
+    return (x0, y0, x1, y1)
 
 
 def create_text_clip(txt,
