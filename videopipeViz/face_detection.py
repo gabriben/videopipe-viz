@@ -76,9 +76,10 @@ def faceDetection(json_path: str,
                   out_path: str,
                   faces_per_round: int = 100) -> None:
 
-    faces_detected = pd.read_json(json_path + v_name + '/' + v_name
-                                  + '_face_detection_datamodel' + '.json',
-                                  lines=True)
+    faces = pd.read_json(json_path + v_name + '/' + v_name
+                         + '_face_detection_datamodel' + '.json',
+                         lines=True)
+    faces_detected = [f for f in faces.data[0] if len(f['faces']) > 0]
     clip = core.read_clip(video_path + v_name)
     fps = clip.fps
     frame_duration = 1 / fps
