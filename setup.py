@@ -7,5 +7,5 @@ setup(name='videopipeViz',
       author='Cas Kok and Jordi Boon',
       author_email='',
       license='MIT',
-      packages=find_packages(),
+      packages=find_packages('moviepy'),
       zip_safe=False)
