@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import videopipeViz.core_viz as core
 from PIL import Image, ImageDraw, ImageFont
-pkg_resources.resource_stream(__name__, 'data/emperors.csv')
 
 
 def make_frame_line(clip, midroll_marker, surrounding_frames=2,
