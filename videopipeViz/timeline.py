@@ -9,7 +9,9 @@ from moviepy.video.io.bindings import mplfig_to_npimage
 import videopipeViz.core_viz as core
 
 import matplotlib
-matplotlib.use("Qt5Agg")
+from sys import platform
+if platform == "darwin":
+    matplotlib.use("Qt5Agg")
 
 
 def read_face_detection(v_name, task):
