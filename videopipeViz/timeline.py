@@ -1,3 +1,4 @@
+import os
 import subprocess
 import pandas as pd
 import numpy as np
@@ -5,7 +6,10 @@ import moviepy.editor as mp
 import matplotlib.pyplot as plt
 import seaborn as sns
 from moviepy.video.io.bindings import mplfig_to_npimage
-import core_viz as core
+import videopipeViz.core_viz as core
+
+import matplotlib
+matplotlib.use("Qt5Agg")
 
 
 def read_face_detection(v_name, task):
@@ -26,11 +30,11 @@ def read_text_detection(v_name, task):
     return texts_detected
 
 
-def read_shot_detection(v_name, task):
+def read_shot_detection(json_path, v_name, task):
     '''
     Read the JSON file with the shot detection data.
     '''
-    shots = pd.read_json(f"{v_name}/{v_name}{task}.json", lines=True)
+    shots = pd.read_json(f"{json_path}{v_name}/{v_name}{task}.json", lines=True)
     shots_detected = [f for f in shots.data[0]]
     return shots_detected
 
@@ -74,6 +78,7 @@ def make_timeline(clip, detected_output, height_ratio=7,
                                                       clip.fps,
                                                       format='seconds')
                        for fr in axis_frames]
+    
     ax.set_xticks(axis_frames, axis_timestamps)
     ax.get_yaxis().set_visible(False)
     plt.tight_layout()
@@ -86,12 +91,24 @@ def add_timeline_to_video(video_path, timeline_vid_path, output_filename):
 
 
 def calculate_time_indicator_frame_number(t):
+
+
     global amount_of_frames_per_delay
     global total_frames_delay
     global delay_frames_left
-    global fps
+    global delay_frames_set
+    
 
-    current_frame = int(round(t * clip.fps))
+    # nonlocal delay_frames_left
+
+    # nonlocal amount_of_frames_per_delay
+    # nonlocal total_frames_delay
+    # nonlocal delay_frames_left
+    # nonlocal delay_frames_set
+    # nonlocal fps
+    
+
+    current_frame = int(round(t * fps))
     if amount_of_frames_per_delay > 0:
         if delay_frames_left == 0:
             delay_frames_left = amount_of_frames_per_delay
@@ -106,19 +123,28 @@ def calculate_time_indicator_frame_number(t):
         # +1 for the just added total_frames_delay
         return current_frame - total_frames_delay + 1
 
+    print(t)
+    
     return current_frame
 
+def timeline(json_path: str,
+             video_path: str,
+             v_name: str,
+             out_path: str,
+             detection_delay_sec = 2) -> None:
 
-if __name__ == '__main__':
-    video_path = 'Videos/'
-    v_name = 'HIGH_LIGHTS_I_SNOWMAGAZINE_I_SANDER_26'
+    global fps
+    global amount_of_frames_per_delay
+    global total_frames_delay
+    global delay_frames_left
+    global delay_frames_set    
+    
     task = '_shot_boundaries_datamodel'
-    detection_delay_sec = 2
+    
 
-    data_detected = read_shot_detection(v_name, task)
-    v_name = video_path + v_name
-
-    clip = core.read_clip(v_name)
+    data_detected = read_shot_detection(json_path, v_name, task)
+    
+    clip = core.read_clip(video_path + v_name)
     fps = clip.fps
     data = [d['dimension_idx'] for d in data_detected]
 
@@ -132,12 +158,15 @@ if __name__ == '__main__':
     amount_of_frames_per_delay = int(detection_delay_sec * fps)
     total_frames_delay = 0
     delay_frames_set = set(data)  #set([d for d in data])
-    delay_frames_left = amount_of_frames_per_delay
+    delay_frames_left = int(detection_delay_sec * fps)
+
+    # import pdb
+    # pdb.set_trace()
 
     last_line = None
 
     def make_frame(t):
-        global last_line
+        nonlocal last_line
 
         if last_line is not None:
             last_line.remove()
@@ -150,16 +179,22 @@ if __name__ == '__main__':
 
         return mplfig_to_npimage(fig)
 
+
     total_video_time = clip.duration + len(data) * detection_delay_sec
 
     animation = mp.VideoClip(make_frame,
                              duration=total_video_time)
 
-    core.write_clip(animation, v_name + task + "_timeline_with_midroll_test_2sec_test_v3", audio=False)
+    timeline_mp4 = out_path + v_name + task
+    timeline_mp4_with_postfix = timeline_mp4 + '_midroll_delay_' + str(detection_delay_sec) + '.mp4'
 
-    add_timeline_to_video("HIGH_LIGHTS_I_SNOWMAGAZINE_I_SANDER_26_shot_boundaries_datamodel_2sec.mp4",
-                          v_name + task + "_timeline_with_midroll_test_2sec_test_v3_.mp4",
-                          v_name + task + "_timeline_midroll_2sec_final.mp4")
+    if not os.path.exists(timeline_mp4_with_postfix):
+        core.write_clip(animation, timeline_mp4, postfix= 'midroll_delay_' + str(detection_delay_sec),
+                    audio=False, logger = 'bar')
+
+    add_timeline_to_video(video_path + v_name + ".mp4",
+                          timeline_mp4_with_postfix,
+                          out_path + v_name + task + "_timeline_midroll_delay" + str(detection_delay_sec) + ".mp4")
 
 
 
