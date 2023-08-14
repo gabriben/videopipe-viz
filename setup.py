@@ -10,5 +10,6 @@ setup(name='videopipeViz',
       packages=find_packages(),
       install_requires=[
           'moviepy',
+          'ffmpeg'
       ],
       zip_safe=False)
