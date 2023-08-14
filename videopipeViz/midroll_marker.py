@@ -38,7 +38,7 @@ def make_frame_line(clip, midroll_marker, surrounding_frames=2,
 
     #font = ImageFont.truetype("NotoSansMono-Bold.ttf", 70)
     truetype_url = 'https://github.com/googlefonts/roboto/raw/main/src/hinted/Roboto-Medium.ttf?raw=true'
-    font = ImageFont.truetype(urlopen(truetype_url), size=10)
+    font = ImageFont.truetype(urlopen(truetype_url), size=70)
     draw = ImageDraw.Draw(frame_line)
     output_text = f"{frame_type.capitalize()} between frames " + \
                   f"{frame_before_midroll} and {frame_after_midroll}"
