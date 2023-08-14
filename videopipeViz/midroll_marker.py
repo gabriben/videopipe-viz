@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import videopipeViz.core_viz as core
 from PIL import Image, ImageDraw, ImageFont
+pkg_resources.resource_stream(__name__, 'data/emperors.csv')
 
 
 def make_frame_line(clip, midroll_marker, surrounding_frames=2,
@@ -35,13 +36,13 @@ def make_frame_line(clip, midroll_marker, surrounding_frames=2,
         pos_in_line = ((2 * surrounding_frames - after_idx) * w, 0)
         frame_line.paste(frame, pos_in_line)
 
-    font = ImageFont.truetype("NotoSansMono-Bold.ttf", 70)
+    #font = ImageFont.truetype("NotoSansMono-Bold.ttf", 70)
     draw = ImageDraw.Draw(frame_line)
     output_text = f"{frame_type.capitalize()} between frames " + \
                   f"{frame_before_midroll} and {frame_after_midroll}"
     draw.text(((surrounding_frames + 0.05) * w, h/3),
               output_text,
-              font=font,
+              #font=font,
               fill='white')
     before_timestamp = core.frame_number_to_timestamp(frame_before_midroll,
                                                       clip.fps)
