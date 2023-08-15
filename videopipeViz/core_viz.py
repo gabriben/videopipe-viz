@@ -116,15 +116,12 @@ def write_clip(clip, name, postfix='', audio=True, fps=25, logger=None):
                              audio=audio,
                              preset='fast')
     except: # TODO: fix blind except
-        try:
-            clip.write_videofile(f"{name}_{postfix}.mp4",
-                                 codec='libx264',
-                                 fps=fps,
-                                 logger=logger,
-                                 audio=audio,
-                                 preset='ultrafast')
-        except: # TODO: fix blind except
-            raise Exception('An error occured while writing the video file.')
+        clip.write_videofile(f"{name}_{postfix}.mp4",
+                             codec='libx264',
+                             fps=fps,
+                             logger=logger,
+                             audio=audio,
+                             preset='ultrafast')
 
 
 def files_to_video(clip, v_name, rounds, filename,
