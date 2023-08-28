@@ -1,9 +1,11 @@
+import os
 import pandas as pd
 import numpy as np
 import moviepy.editor as mp
 from PIL import ImageDraw
 
 import videopipeViz.core_viz as core
+import videopipeViz.timeline as tl
 
 
 def read_face_detection(path, v_name, task):
@@ -75,6 +77,9 @@ def faceDetection(json_path: str,
                   v_name: str,
                   out_path: str,
                   json_postfix: str = '_face_detection_datamodel',
+                  add_timeline=True,
+                  add_tl_indicators=True,
+                  add_tl_graph=True,
                   faces_per_round: int = 100) -> None:
 
     faces = pd.read_json(json_path + v_name + '/'
@@ -110,8 +115,32 @@ def faceDetection(json_path: str,
                             audio=False)
             f.write('file ' + v_name + '_' + str(round) + '.mp4\n')
 
+    new_v_name = out_path + v_name + json_postfix
+
     core.files_to_video(clip,
                         v_name,
                         total_rounds,
                         out_path + 'face_detection.txt',
-                        out_path + v_name + '_face_detection.mp4')
+                        new_v_name + '.mp4')
+
+    if not add_timeline:
+        return
+
+    face_frame_numbers = [face['dimension_idx'] for face in faces_detected]
+    timeline = tl.TimelineAnimation(clip,
+                                    v_name,
+                                    face_frame_numbers,
+                                    add_graph=add_tl_graph,
+                                    add_indicators=add_tl_indicators,
+                                    detection_delay_sec=0,
+                                    task=json_postfix)
+
+    timeline.create().add_to_video(new_v_name + '.mp4',
+                                   new_v_name + '_timeline.mp4')
+
+    if os.path.exists(new_v_name + '.mp4'):
+        os.remove(new_v_name + '.mp4')
+
+    if os.path.exists(new_v_name + '_timeline_only.mp4'):
+        os.remove(new_v_name + '_timeline_only.mp4')
+
