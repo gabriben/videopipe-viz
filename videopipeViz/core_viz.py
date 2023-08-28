@@ -4,14 +4,6 @@ import numpy as np
 import subprocess
 import os
 
-# Change the ffmpeg binary of moviepy to the local one
-# to allow for hw acceleration.
-try:
-    from moviepy.config import change_settings
-    change_settings({"FFMPEG_BINARY": "ffmpeg"})
-except: # TODO: fix blind except
-    pass
-
 
 def frame_number_to_timestamp(frame_number, fps, format='milliseconds'):
     total_seconds = frame_number / fps
@@ -116,7 +108,7 @@ def write_clip(clip, name, postfix='', audio=True, fps=25, logger=None):
                              logger=logger,
                              audio=audio,
                              preset='fast')
-    except: # TODO: fix blind except
+    except IOError:
         try:
             clip.write_videofile(f"{name}{postfix}.mp4",
                                  codec='libx264',
@@ -124,7 +116,7 @@ def write_clip(clip, name, postfix='', audio=True, fps=25, logger=None):
                                  logger=logger,
                                  audio=audio,
                                  preset='ultrafast')
-        except: # TODO: fix blind except
+        except IOError:
             raise Exception('An error occured while writing the video file.')
 
 

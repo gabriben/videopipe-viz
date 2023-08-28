@@ -8,11 +8,12 @@ import videopipeViz.core_viz as core
 import videopipeViz.timeline as tl
 
 
-def read_face_detection(path, v_name, task):
+def read_face_detection(json_path, v_name, json_postfix):
     '''
     Read the face detection JSON file.
     '''
-    faces = pd.read_json(path + v_name + '/' + v_name + task + '.json',
+    faces = pd.read_json(json_path + v_name + '/'
+                         + v_name + json_postfix + '.json',
                          lines=True)
     faces_detected = [f for f in faces.data[0] if len(f['faces']) > 0]
     return faces_detected
@@ -100,11 +101,7 @@ def faceDetection(json_path: str,
         faces_per_round (int, optional): Sets the amount of detections per
         round, can be optimized for performance. Defaults to 100.
     """
-
-    faces = pd.read_json(json_path + v_name + '/'
-                         + v_name + json_postfix + '.json',
-                         lines=True)
-    faces_detected = [f for f in faces.data[0] if len(f['faces']) > 0]
+    faces_detected = read_face_detection(json_path, v_name, json_postfix)
     clip = core.read_clip(video_path + v_name)
     frame_duration = 1 / clip.fps
 
@@ -158,4 +155,3 @@ def faceDetection(json_path: str,
 
     if os.path.exists(new_v_name + '.mp4'):
         os.remove(new_v_name + '.mp4')
-
