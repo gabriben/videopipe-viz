@@ -107,8 +107,10 @@ def write_audioclip(clip, v_name, logger=None):
 
 def write_clip(clip, name, postfix='', audio=True, fps=25, logger=None):
     ''' Write the clip to a file. Try using hw acceleration first. '''
+    if postfix != '':
+        postfix = '_' + postfix
     try:
-        clip.write_videofile(f"{name}_{postfix}.mp4",
+        clip.write_videofile(f"{name}{postfix}.mp4",
                              codec='h264_nvenc',
                              fps=fps,
                              logger=logger,
@@ -116,7 +118,7 @@ def write_clip(clip, name, postfix='', audio=True, fps=25, logger=None):
                              preset='fast')
     except: # TODO: fix blind except
         try:
-            clip.write_videofile(f"{name}_{postfix}.mp4",
+            clip.write_videofile(f"{name}{postfix}.mp4",
                                  codec='libx264',
                                  fps=fps,
                                  logger=logger,
