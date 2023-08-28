@@ -81,6 +81,25 @@ def faceDetection(json_path: str,
                   add_tl_indicators=True,
                   add_tl_graph=True,
                   faces_per_round: int = 100) -> None:
+    """ Burns in the face detection JSON in the video and
+    adds a timeline animation on the bottom displaying the detection density.
+
+    Args:
+        json_path (str): path of the JSON folder
+        video_path (str): path of the folder of the video.
+        v_name (str): name of the original video.
+        out_path (str): folder for the output video.
+        json_postfix (str, optional): postfix of the JSON file.
+                                      Defaults to '_face_detection_datamodel'.
+        add_timeline (bool, optional): Flag for the addition of the timeline.
+                                       Defaults to True.
+        add_tl_indicators (bool, optional): Flag for the timeline indicators.
+                                            Defaults to True.
+        add_tl_graph (bool, optional): Flag for the addition of the graphline.
+                                       Currently UNUSED. Defaults to True.
+        faces_per_round (int, optional): Sets the amount of detections per
+        round, can be optimized for performance. Defaults to 100.
+    """
 
     faces = pd.read_json(json_path + v_name + '/'
                          + v_name + json_postfix + '.json',
