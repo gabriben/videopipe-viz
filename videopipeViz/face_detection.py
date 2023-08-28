@@ -3,7 +3,7 @@ import numpy as np
 import moviepy.editor as mp
 from PIL import ImageDraw
 
-import core_viz as core
+import videopipeViz.core_viz as core
 
 
 def read_face_detection(path, v_name, task):
@@ -74,22 +74,21 @@ def faceDetection(json_path: str,
                   video_path: str,
                   v_name: str,
                   out_path: str,
+                  json_postfix: str = '_face_detection_datamodel',
                   faces_per_round: int = 100) -> None:
 
-    faces = pd.read_json(json_path + v_name + '/' + v_name
-                         + '_face_detection_datamodel' + '.json',
+    faces = pd.read_json(json_path + v_name + '/'
+                         + v_name + json_postfix + '.json',
                          lines=True)
     faces_detected = [f for f in faces.data[0] if len(f['faces']) > 0]
     clip = core.read_clip(video_path + v_name)
-    fps = clip.fps
-    frame_duration = 1 / fps
+    frame_duration = 1 / clip.fps
 
     face_frame_duration = frame_duration
+    total_rounds = len(faces_detected) // faces_per_round
+
     prev_ts = 0
-
-    with open('face_detection.txt', 'w') as f:
-        total_rounds = len(faces_detected) // faces_per_round
-
+    with open(out_path + 'face_detection.txt', 'w') as f:
         # Create video clips with 'faces_per_round' amount of detected faces
         # inserted per clip.
         for round in range(total_rounds + 1):
@@ -111,4 +110,8 @@ def faceDetection(json_path: str,
                             audio=False)
             f.write('file ' + v_name + '_' + str(round) + '.mp4\n')
 
-    core.files_to_video(clip, v_name, round, 'face_detection.txt', out_path)
+    core.files_to_video(clip,
+                        v_name,
+                        total_rounds,
+                        out_path + 'face_detection.txt',
+                        out_path + v_name + '_face_detection.mp4')
