@@ -167,13 +167,3 @@ class TimelineAnimation:
 
         if os.path.exists(temp_file_name):
             os.remove(temp_file_name)
-
-
-
-
-
-
-
-
-
-
