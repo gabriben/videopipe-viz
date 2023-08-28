@@ -11,7 +11,7 @@ class FrameType(Enum):
     shotboundary = 'Shot boundary'
 
 
-def make_frame_line(clip: mp.VideoFileClip,
+def make_frame_line(clip: mp.video.VideoClip,
                     midroll_marker: str,
                     surrounding_frames: int = 2,
                     frame_type: FrameType = FrameType.midroll) -> Image:
