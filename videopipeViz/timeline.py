@@ -137,48 +137,27 @@ class TimelineAnimation:
 
         return mplfig_to_npimage(self.fig)
 
-    def create(self, timeline_postfix='_timeline_only'):
-        """ Create the timeline animation and write to a file formatted as:
-        <original video name> + <task> + <timeline_postfix> + '.mp4'
-
-        example: 'video_name_face_detection_timeline_only.mp4'
-
-        Also saves this filename for when the add_to_video method will be
-        called afterwards.
-
-        Args:
-            timeline_postfix (str, optional): postfix of the filename to
-            write to. Defaults to '_timeline_only'.
-
-        Returns:
-            self
-        """
-        animation = mp.VideoClip(self._make_frame,
-                                 duration=self.total_video_time)
-        core.write_clip(animation,
-                        self.v_name + self.task + timeline_postfix,
-                        audio=False)
-        self.file_name = self.v_name + self.task + timeline_postfix + '.mp4'
-
-        return self
-
     def add_to_video(self, burned_in_video_path: str, output_filename: str):
-        """ Adds the timeline animation to the video with
-        the burned in detections.
+        """ Create and add the timeline animation to the video with
+        the burned in detections. the output file is formatted as:
+        <original video name> + <task> + 'timeline.mp4'
+
+        example: 'video_name_face_detection_timeline.mp4'
 
         Args:
             burned_in_video_path (str): path of the video with the detections
             burned into it.
             output_filename (str): filename of the output video.
 
-        Raises:
-            ValueError: If self.file_name is not set by the create method, an
-            error is raised.
         """
-        if not self.file_name:
-            raise ValueError('No filename known, ' +
-                             'did you create the animation first?')
-        cmd = f"ffmpeg -i {burned_in_video_path} -i {self.file_name} " \
+        animation = mp.VideoClip(self._make_frame,
+                                 duration=self.total_video_time)
+        core.write_clip(animation,
+                        self.v_name + self.task + '_timeline_only',
+                        audio=False)
+        temp_file_name = self.v_name + self.task + '_timeline_only.mp4'
+
+        cmd = f"ffmpeg -i {burned_in_video_path} -i {temp_file_name} " \
               f"-filter_complex vstack {output_filename}"
         subprocess.call(cmd, shell=True)
 
