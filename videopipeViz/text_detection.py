@@ -3,7 +3,7 @@ import moviepy.editor as mp
 from PIL import ImageDraw
 from PIL import ImageFont
 import numpy as np
-import core_viz as core
+import videopipeViz.core_viz as core
 
 
 def read_text_detection(path, v_name, task):
