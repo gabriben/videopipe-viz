@@ -1,3 +1,4 @@
+import os
 import subprocess
 import numpy as np
 import moviepy.editor as mp
@@ -142,13 +143,16 @@ class TimelineAnimation:
         the burned in detections. the output file is formatted as:
         <original video name> + <task> + 'timeline.mp4'
 
-        example: 'video_name_face_detection_timeline.mp4'
+        for example 'video_name_face_detection_timeline.mp4'.
+
+        The created timeline animation is written to a file called:
+        <original video name> + <task> + 'timeline_only.mp4'
+        This file is deleted afterwards.
 
         Args:
             burned_in_video_path (str): path of the video with the detections
             burned into it.
             output_filename (str): filename of the output video.
-
         """
         animation = mp.VideoClip(self._make_frame,
                                  duration=self.total_video_time)
@@ -160,6 +164,9 @@ class TimelineAnimation:
         cmd = f"ffmpeg -i {burned_in_video_path} -i {temp_file_name} " \
               f"-filter_complex vstack {output_filename}"
         subprocess.call(cmd, shell=True)
+
+        if os.path.exists(temp_file_name):
+            os.remove(temp_file_name)
 
 
 

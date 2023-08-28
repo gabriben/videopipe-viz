@@ -135,12 +135,8 @@ def faceDetection(json_path: str,
                                     detection_delay_sec=0,
                                     task=json_postfix)
 
-    timeline.create().add_to_video(new_v_name + '.mp4',
-                                   new_v_name + '_timeline.mp4')
+    timeline.add_to_video(new_v_name + '.mp4', new_v_name + '_timeline.mp4')
 
     if os.path.exists(new_v_name + '.mp4'):
         os.remove(new_v_name + '.mp4')
-
-    if os.path.exists(new_v_name + '_timeline_only.mp4'):
-        os.remove(new_v_name + '_timeline_only.mp4')
 
