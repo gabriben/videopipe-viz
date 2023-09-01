@@ -1,12 +1,21 @@
 import pandas as pd
 import numpy as np
+import moviepy as mp
 import videopipeViz.core_viz as core
 from PIL import Image, ImageDraw, ImageFont
-from urllib.request import urlopen
+from enum import Enum
 
 
-def make_frame_line(clip, midroll_marker, surrounding_frames=2,
-                    frame_type='Midroll'):
+
+class FrameType(Enum):
+    midroll = 'Midroll'
+    shotboundary = 'Shot boundary'
+
+
+def make_frame_line(clip: mp.video.VideoClip,
+                    midroll_marker: str,
+                    surrounding_frames: int = 2,
+                    frame_type: FrameType = FrameType.midroll) -> Image:
     """ Make a row of frames indicating
     the frame-precise position of the midroll. """
     w, h = clip.size
@@ -62,13 +71,15 @@ def midrollMarker(json_path: str,
                   video_path: str,
                   v_name: str,
                   out_path: str) -> None:
+
     # read thumbnail json
-    
-    midroll = pd.read_json(json_path + v_name + '/' + v_name + '_midroll_marker_output' + '.json', lines=True)
+    midroll = pd.read_json(json_path + v_name + '/' + v_name
+                           + '_midroll_marker_output' + '.json',
+                           lines=True)
     midroll_markers = midroll['midroll_markers'][0]
 
     # Read video file with moviepy
     clip = core.read_clip(video_path + v_name)
-    # mp.VideoFileClip(video_path + v_name + '.mp4')
 
-    make_frame_line(clip, midroll_markers[0]).save(out_path + v_name + "_midroll_indication.jpg")
+    make_frame_line(clip, midroll_markers[0]).save(out_path + v_name
+                                                   + "_midroll_indication.jpg")

@@ -1,13 +1,14 @@
 import pandas as pd
-import core_viz as core
+import videopipeViz.core_viz as core
 from PIL import Image, ImageFont, ImageDraw
 
 
-def read_still_picker(v_name, task):
+def read_still_picker(json_path, v_name, task):
     '''
     Read the JSON file with the still picker data.
     '''
-    thumbnail = pd.read_json(v_name + '/' + v_name + task + '.json',
+    thumbnail = pd.read_json(json_path + '/' + v_name + '/'
+                             + v_name + task + '.json',
                              lines=True)
     thumbnail_frames = [f for f in thumbnail.thumbnails_by_frameindex]
     return thumbnail_frames
@@ -76,28 +77,28 @@ def make_top_6_template_dict(size):
     w = size[0]//3
     h = size[1]//3
     template_dict = {}
-    template_dict[0] = (2*w, 2*h), (0, 0)
-    template_dict[1] = (w, h),     (2*w, 0)
-    template_dict[2] = (w, h),     (2*w, h)
-    template_dict[3] = (w, h),     (0, 2*h)
-    template_dict[4] = (w, h),     (w, 2*h)
-    template_dict[5] = (w, h),     (2*w, 2*h)
+    template_dict[1] = (2*w, 2*h), (0, 0)
+    template_dict[2] = (w, h),     (2*w, 0)
+    template_dict[3] = (w, h),     (2*w, h)
+    template_dict[4] = (w, h),     (0, 2*h)
+    template_dict[5] = (w, h),     (w, 2*h)
+    template_dict[6] = (w, h),     (2*w, 2*h)
 
     return template_dict
 
 
 def make_thumbnails_image(clip, thumbnail_frames, template_dict,
-                          number_shadow=True, border_px=1):
+                          number_shadow=True, border_px=2):
 
     top_frames = top_still_frames(thumbnail_frames, frame_amt=6)
 
     stills_image = Image.new('RGB', clip.size)
 
-    for rank, frame in enumerate(top_frames):
+    for rank, frame in enumerate(top_frames, start=1):
         still_size, still_pos = template_dict[rank]
         still = make_single_still_image(clip,
                                         frame,
-                                        rank + 1,  # Start rank from 1.
+                                        rank,
                                         still_size,
                                         number_shadow=number_shadow,
                                         border_px=border_px)
@@ -106,29 +107,21 @@ def make_thumbnails_image(clip, thumbnail_frames, template_dict,
     return stills_image
 
 
-if __name__ == '__main__':
-
-    # this can be empty if the video file and its videopipe output
-    # are at the same location as the code
-    path = ''
-    video_path = 'Videos/'
-    v_name = 'HIGH_LIGHTS_I_SNOWMAGAZINE_I_SANDER_26'
-    task = '_still_picker_output'
-
-    # Set output filename.
-    output_filename = v_name + "_top_6_thumbnails.jpg"
-
+def stillPicker(json_path: str,
+                video_path: str,
+                v_name: str,
+                out_path: str) -> None:
     # Read video file.
     clip = core.read_clip(video_path + v_name)
 
     # Read JSON
-    thumbnail_frames = read_still_picker(v_name, task)
+    thumbnail_frames = read_still_picker(json_path, v_name,
+                                         '_still_picker_output')
 
     top_6_template = make_top_6_template_dict(clip.size)
 
     make_thumbnails_image(clip,
                           thumbnail_frames,
                           top_6_template,
-                          border_px=2).save(output_filename)
-
-
+                          border_px=2
+                          ).save(out_path + v_name + "_top_6_thumbnails.jpg")

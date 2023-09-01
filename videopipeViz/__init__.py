@@ -1,2 +1,6 @@
 from videopipeViz.midroll_marker import midrollMarker
-from videopipeViz.timeline import timeline
+from videopipeViz.face_detection import faceDetection
+from videopipeViz.text_detection import textDetection
+from videopipeViz.shot_detection import shotDetection
+from videopipeViz.still_picker import stillPicker
+
