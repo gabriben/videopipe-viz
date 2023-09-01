@@ -8,4 +8,8 @@ setup(name='videopipeViz',
       author_email='',
       license='MIT',
       packages=find_packages(),
+      install_requires=[
+          'moviepy',
+          'ffmpeg'
+      ],
       zip_safe=False)
