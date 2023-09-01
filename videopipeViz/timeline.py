@@ -12,30 +12,37 @@ class TimelineAnimation:
     """ Class for the timeline animation. """
     def __init__(self,
                  clip,
-                 v_name,
-                 data,
-                 task,
-                 detection_delay_sec=0,
-                 add_graph=True,  # Currently unused and always True
+                 v_name: str,
+                 data: list,
+                 task: str,
+                 delay_sec: float,
+                 # add_graph=True,
                  add_indicators=True,
                  ):
         self.clip = clip
         self.v_name = v_name
         self.data = data
         self.task = task
-        self.detection_delay_sec = detection_delay_sec
-        self.add_graph = add_graph
+        self.delay_sec = delay_sec
+        # self.add_graph = add_graph
         self.add_indicators = add_indicators
         self.fps = clip.fps
         self.total_frames_delay = 0
         self.delay_frames_set = set(data)
-        self.delay_frames_left = int(detection_delay_sec * self.fps)
+        self.delay_frames_left = 0
         self.last_line = None
 
-        self.file_name = None
-
         self.fig, self.ax = self._make_timeline()
-        self.total_video_time = clip.duration + len(data) * detection_delay_sec
+        # Hacky fix for shot boundaries. Shot boundaries duplicate 1 frame on
+        # each shot boundary, so the timeline duration would be len(data)
+        # too long. If this is fixed, the commented code below should work.
+        if delay_sec == 1 / clip.fps:
+            self.total_video_time = clip.duration
+        else:
+            self.total_video_time = clip.duration + len(data) * delay_sec
+
+        # self.total_video_time = (clip.duration + len(data)
+        #                          * (delay_sec - (1 / clip.fps)))
 
     def _calculate_time_indicator_frame_number(self, t: int) -> int:
         """ Helper function to calculate the frame number of the video when
@@ -48,18 +55,21 @@ class TimelineAnimation:
         Returns:
             int: current frame number.
         """
-        frame_number = int(round(t * self.fps))
+        current_frame = int(round(t * self.fps))
 
-        if self.delay_frames_left > 0:
+        if self.delay_sec == 1 / self.fps:
+            return current_frame
+
+        video_frame = current_frame - self.total_frames_delay
+
+        if self.delay_frames_left:
             self.delay_frames_left -= 1
             self.total_frames_delay += 1
+        elif video_frame in self.delay_frames_set:
+            self.delay_frames_set.discard(video_frame)
+            self.delay_frames_left = int(self.delay_sec * self.fps)
 
-            if frame_number - self.total_frames_delay in self.delay_frames_set:
-                self.delay_frames_set.discard(frame_number -
-                                              self.total_frames_delay)
-                return frame_number - self.total_frames_delay + 1
-
-        return frame_number
+        return video_frame
 
     def _make_timeline(self,
                        height_ratio: int = 7,
@@ -99,6 +109,9 @@ class TimelineAnimation:
                      colors='lightblue',
                      lw=1,
                      zorder=0)
+
+        # Midroll indications could be implemented like this,
+        # but not hardcoded.
 
         # midroll_indicator = 10664
         # ax.axvline(midroll_indicator,
